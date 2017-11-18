@@ -66,8 +66,6 @@ class CreateProject extends Component {
     constructor() {
         super();
         this.state = {
-            startDate: "",
-            endDate: "",
         }
 
     }

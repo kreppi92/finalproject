@@ -161,7 +161,6 @@ class SimpleMap extends Component {
     }
 
     render() {
-        console.log(this.state)
         return (
             <Wrapper>
                 <TestDiv zIndex="10000000" isSelected={this.state.selectedObject}>
