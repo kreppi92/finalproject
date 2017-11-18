@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import shouldPureComponentUpdate from 'react-pure-render/function';
 import { alert } from './avatars.js'
 
 const Thumbnail = styled.div`
-min-width: 300px;
-width: 100%;
+min-width: 20vw; 
 height: 75px;
 background-color: ${(props) => props.isSelected ? "rgba(100,100,100,.5)" : props.isHovering ? "rgba(100,100,100,.5)" : "rgba(0,0,0,.5)"};
 -webkit-filter: drop-shadow(${(props) => props.isSelected ? "0px 0px 12px rgba(0, 231, 255, 0.8)" : "0"});
@@ -13,6 +12,9 @@ background-color: ${(props) => props.isSelected ? "rgba(100,100,100,.5)" : props
 display: flex;
 color: white;
 cursor: pointer;
+&:active{
+    cursor: url("https://maps.gstatic.com/mapfiles/openhand_8_8.cur"), default;
+}
 `
 
 const Avatar = styled.div`
@@ -44,7 +46,8 @@ text-align: left;
 `
 
 const Alert = styled.div`
-position: absolute;
+position: relative;
+transform: translate(0%, 100%);
 width: 25px;
 height: 25px;
 display: float;
@@ -56,9 +59,9 @@ height: 100%;
 `
 
 class ListThumbnail extends Component {
-    constructor(props) {
-        super(props)
-    }
+    // constructor(props) {
+    //     super(props)
+    // }
 
     shouldComponentUpdate = shouldPureComponentUpdate;
 

@@ -5,13 +5,17 @@
   "dependencies": {
     "firebase": "^4.6.2",
     "google-map-react": "^0.25.0",
+    "moment": "^2.19.2",
     "prop-types": "^15.6.0",
     "react": "^16.1.1",
+    "react-datepicker": "^0.61.0",
     "react-dom": "^16.1.1",
+    "react-google-autocomplete": "^1.0.15",
     "react-pure-render": "^1.0.2",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.0.17",
+    "react-streetview": "^1.1.0",
     "styled-components": "^2.2.3"
   },
   "scripts": {

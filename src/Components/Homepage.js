@@ -1,11 +1,11 @@
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import React, { Component } from 'react';
 import avatars from './avatars.js'
 import { Link } from 'react-router-dom';
 import '../App.css';
 
 const darkGreen = "#24282b";
-const green = "#4d6059";
+// const green = "#4d6059";
 const lightGreen = "#7f8d89";
 
 
@@ -15,16 +15,6 @@ height: 100vh;
 display: block;
 justify-content: center;
 align-items: center;
-
-* {
-@import url('https://fonts.googleapis.com/css?family=Open+Sans');
-font-family: 'Open Sans', sans-serif;
-color: white;
-}
-
-*:focus {
-    outline: none;
-}
 `;
 
 const Row = styled.div`
@@ -61,41 +51,41 @@ const LoginButton = styled.button`
         color: white;
         background-color: ${darkGreen};
         }
-
 `;
 
 
 class Homepage extends Component {
 
-constructor() {
-    super();
-    this.state = {
-        image: 0,
-    }
-}
-
-_animation = () => {
-    if (this.state.image>avatars.length-3) {
-        this.setState((st)=>({image: 0}))
-    } else {
-        this.setState((st)=>({image: st.image +1 }))
+    constructor() {
+        super();
+        this.state = {
+            image: 0,
+        }
     }
 
-}
+    _animation = () => {
+        if (this.state.image > avatars.length - 3) {
+            this.setState((st) => ({ image: 0 }))
+        } else {
+            this.setState((st) => ({ image: st.image + 1 }))
+        }
 
-componentDidMount() {
-    setInterval(this._animation, 1000)
-}
+    }
+
+    componentDidMount() {
+        setInterval(this._animation, 1000)
+    }
+
     render() {
         return (
             <Wrapper>
                 <ImageRow>
-                    <img src={avatars[this.state.image]} />
+                    <img src={avatars[this.state.image]} alt="House building animation"/>
                 </ImageRow>
                 <Row>
                     <h1>HOME BUILDER</h1>
                     <Link to={"/projects"}>
-                    <LoginButton> LOGIN </LoginButton>
+                        <LoginButton> LOGIN </LoginButton>
                     </Link>
                 </Row>
             </Wrapper>
