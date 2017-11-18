@@ -20,6 +20,7 @@ cursor: pointer;
 const Avatar = styled.div`
 min-width: 75px;
 min-height: 75px;
+position: relative;
 `
 
 const Description = styled.div`
@@ -46,14 +47,15 @@ text-align: left;
 `
 
 const Alert = styled.div`
-position: relative;
-transform: translate(0%, 100%);
+position: absolute;
+display: float;
+transform: translate(25%, 25%);
 width: 25px;
 height: 25px;
-display: float;
 `
 
 const AlertImage = styled.img`
+position: absolute;
 width: 100%;
 height: 100%;
 `
