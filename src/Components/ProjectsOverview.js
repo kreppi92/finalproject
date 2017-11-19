@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import SimpleMap from './SimpleMap.js'
+import { initializeUserIfNeeded } from './backend.js'
+import { getCurrentProjects } from './backend.js';
 
 
 const Wrapper = styled.div`
@@ -96,10 +98,47 @@ const objects = [{
 
 
 class ProjectsOverview extends Component {
+constructor(props) {
+    super(props);
+    this.state = {
+        objects: [{
+            projectId: "",
+              completionStatus: {},
+              startDate: "",
+              endDate: "",
+              address: "",
+              coords: {lat: "", lng: ""},
+              description: "",
+              name: "",
+              current: true,
+              cancelled: false,
+              notes: ''
+        }]
+    }
+}
+
+componentWillMount() {
+    getCurrentProjects(this.props.user.id)
+    .then( objects => {
+        console.log(objects)
+        this.setState({
+            objects: objects
+        })
+    }
+    )
+}
+
     render() {
         return (
             <Wrapper>
-                <SimpleMap objects={objects} setHover={this._setHover}/>
+                {/* {this.props.isLoggedIn ?  */}
+                <SimpleMap
+                objects={this.state.objects}
+                setHover={this._setHover}
+                user={this.props.user}
+                handleLogout={this.props.handleLogout}
+                />
+                {/* :<h2> Please login to view </h2>} */}
             </Wrapper>
         )
     }

@@ -9,6 +9,8 @@ import shouldPureComponentUpdate from 'react-pure-render/function';
 import { _returnImage } from './avatars.js';
 import styled from 'styled-components';
 import Scrolling from './Scrolling.js'
+import UserThumbnail from './UserThumbnail.js'
+import { calculateProgressStatus } from './backend.js';
 
 const API_KEY = 'AIzaSyBfxtILkIqiz2_jVj9PjbvUQYJpJI9jzv0'
 
@@ -21,6 +23,7 @@ const lightGreen = "#7f8d89";
 
 const TestDiv = styled.div`
 position: absolute;
+min-width: ${(props) => props.isSelected || props.creatingProject ? `60vw` : `0`};
 top: 10vh;
 left: 10vh;
 z-index: 100000;
@@ -38,11 +41,12 @@ min-width: 20vw;
 
 const TestDivRight = styled.div`
 color: white;
-width: 100%;
-min-width: ${(props) => props.isSelected || props.creatingProject ? `40vw` : `0`};
+min-width:100%;
+width:100%;
+max-width: 100%;
+position:absolute;
 -webkit-transition: 0.5s;
-
-display: block;
+display: flex;
 overflow: hidden;
 white-space: nowrap;
 text-overflow: ellipsis;
@@ -64,6 +68,9 @@ position: relative;
 &::-webkit-scrollbar { 
     display: none; 
 }
+`
+
+const TestDivRightWrapper = styled.div`
 `
 
 const UserProfile = styled.div`
@@ -95,6 +102,13 @@ const NewProject = styled.button`
         color: white;
         background-color: ${darkGreen};
         }
+`
+
+const Title = styled.p`
+padding: 0 1em;
+text-align: left;
+font-size: .9em;
+margin: .5em;
 `
 
 class SimpleMap extends Component {
@@ -160,52 +174,64 @@ class SimpleMap extends Component {
         })
     }
 
+    _calculateProgressStatus = (project) => {
+        const progress = Object.keys(project.completionStatus).map(p => project.completionStatus[p])
+        const comparedLengths = progress.filter(p => p).length / progress.length
+        return comparedLengths * 100
+    }
+
     render() {
         return (
             <Wrapper>
                 <TestDiv zIndex="10000000" isSelected={this.state.selectedObject}>
                     <TestDivLeft>
-                        <UserProfile loginId={this.props.loginIn}>
-                        </UserProfile>
-                        <h3>Current projects...</h3>
+                        <UserThumbnail user={this.props.user} handleLogout={this.props.handleLogout} />
+                        <Title>Current projects...</Title>
                         <ProjectsList>
-                            <Scrolling>
-                                {this.props.objects.map(object => {
-                                    return (
-                                        <ListThumbnail
-                                            projectNumber={object.projectNumber}
-                                            projectTitle={object.projectTitle}
-                                            projectDescription={object.projectDescription}
-                                            address={object.address}
-                                            completionStatus={object.completionStatus}
-                                            lat={object.geoLocation.lat}
-                                            lng={object.geoLocation.lng}
-                                            alert={object.alert}
-                                            zIndex={Math.floor(1 / object.geoLocation.lat * 1000000)}
-                                            image={_returnImage(object.completionStatus)}
-                                            key={object.projectNumber}
-                                            onMouseEnter={() => this._onMouseEnterObject(object.projectNumber)}
-                                            isHovering={this.state.hoveringObject === object.projectNumber}
-                                            onClick={() => this._onClick(object)}
-                                            isSelected={this.state.selectedObject.projectNumber === object.projectNumber}
-                                        />
-                                    )
-                                })}
-                            </Scrolling>
+                            {this.props.objects.length > 1 ?
+                                <Scrolling>
+                                    {this.props.objects.map(object => {
+                                        console.log(this._calculateProgressStatus(object) * 100)
+                                        return (
+                                            <ListThumbnail
+                                                projectNumber={object.id}
+                                                projectTitle={object.name}
+                                                projectDescription={object.description}
+                                                address={object.address}
+                                                completionStatus={this._calculateProgressStatus(object)}
+                                                lat={object.coords.lat}
+                                                lng={object.coords.lng}
+                                                alert={object.notes}
+                                                zIndex={Math.floor(1 / object.coords.lat * 1000000)}
+                                                image={_returnImage(this._calculateProgressStatus(object))}
+                                                key={object.id}
+                                                onMouseEnter={() => this._onMouseEnterObject(object.id)}
+                                                isHovering={this.state.hoveringObject === object.id}
+                                                onClick={() => this._onClick(object)}
+                                                isSelected={this.state.selectedObject.id === object.id}
+                                            />
+                                        )
+                                    })}
+                                </Scrolling>
+                                :
+                                false
+                            }
                         </ProjectsList>
                         <NewProject onClick={this._handleCreateNewProject} creatingNewProject={this.state.creatingProject}>
                             + NEW PROJECT
-                            </NewProject>
+                        </NewProject>
                     </TestDivLeft>
+                    <TestDivRightWrapper>
                     <TestDivRight isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
-                        {this.state.selectedObject ? <ProjectInfo object={this.state.selectedObject} /> : false}
-                        {this.state.creatingProject ? <CreateProject handleNewAddress={this._handleNewAddress} /> : false}
+                        {this.state.selectedObject ? <ProjectInfo object={this.state.selectedObject} completionStatus={this._calculateProgressStatus(this.state.selectedObject)} /> : false}
+                        {this.state.creatingProject ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} /> : false}
                     </TestDivRight>
+                    </TestDivRightWrapper>
                 </TestDiv>
                 <GoogleMapReact
                     defaultCenter={this.props.center}
                     defaultZoom={this.props.zoom}
-                    center={this.state.newAddress ? { lat: this.state.newAddress.lat, lng: this.state.newAddress.lng + this.state.offsetAmount } : this.state.selectedObject ? { lat: this.state.selectedObject.geoLocation.lat, lng: this.state.selectedObject.geoLocation.lng + this.state.offsetAmount } : null}
+                    center={this.state.newAddress ? { lat: this.state.newAddress.lat, lng: this.state.newAddress.lng + this.state.offsetAmount } : this.state.selectedObject ? { lat: this.state.selectedObject.coords.lat, lng: this.state.selectedObject.coords.lng + this.state.offsetAmount } : null}
                     bootstrapURLKeys={{
                         key: API_KEY,
                     }}
@@ -218,23 +244,24 @@ class SimpleMap extends Component {
                 >
                     {this.props.objects.map(object => {
                         return (
+
                             <PinThumbnail
-                                projectNumber={object.projectNumber}
-                                projectTitle={object.projectTitle}
-                                projectDescription={object.projectDescription}
+                                projectNumber={object.id}
+                                projectTitle={object.name}
+                                projectDescription={object.description}
                                 address={object.address}
-                                completionStatus={object.completionStatus}
-                                lat={object.geoLocation.lat}
-                                lng={object.geoLocation.lng}
+                                completionStatus={this._calculateProgressStatus(object)}
+                                lat={object.coords.lat}
+                                lng={object.coords.lng}
                                 alert={object.alert}
-                                zIndex={Math.floor(1 / object.geoLocation.lat * 1000000)}
-                                image={_returnImage(object.completionStatus)}
-                                key={object.projectNumber}
-                                onMouseEnter={() => this._onMouseEnterObject(object.projectNumber)}
+                                zIndex={Math.floor(1 / object.coords.lat * 1000000)}
+                                image={_returnImage(this._calculateProgressStatus(object))}
+                                key={object.id}
+                                onMouseEnter={() => this._onMouseEnterObject(object.id)}
                                 onMouseLeave={this._onMouseLeaveObject}
-                                isHovering={this.state.hoveringObject === object.projectNumber}
+                                isHovering={this.state.hoveringObject === object.id}
                                 onClick={() => this._onClick(object)}
-                                isSelected={this.state.selectedObject.projectNumber === object.projectNumber}
+                                isSelected={this.state.selectedObject.id === object.id}
                             />
                         )
                     })}

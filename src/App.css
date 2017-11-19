@@ -13,7 +13,8 @@ body {
                                     supported by Chrome and Opera */
 }
 
-body:focus {
+
+*:focus {
   outline: none;
 }
 

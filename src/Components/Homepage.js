@@ -80,13 +80,18 @@ class Homepage extends Component {
         return (
             <Wrapper>
                 <ImageRow>
-                    <img src={avatars[this.state.image]} alt="House building animation"/>
+                    <img src={avatars[this.state.image]} alt="House building animation" />
                 </ImageRow>
                 <Row>
-                    <h1>HOME BUILDER</h1>
-                    <Link to={"/projects"}>
-                        <LoginButton> LOGIN </LoginButton>
-                    </Link>
+                    {this.props.isLoggedIn ? <h1>Welcome {this.props.userName}</h1> : <h1>HOME BUILDER</h1>}
+                    {this.props.isLoggedIn ?
+                        (<Link to="/projects">
+                            <LoginButton>Enter</LoginButton>
+                        </Link>)
+                        :
+                        <LoginButton onClick={this.props.handleLogin}>LOGIN</LoginButton>
+                    }
+
                 </Row>
             </Wrapper>
         )
