@@ -4,18 +4,16 @@ import Autocomplete from 'react-google-autocomplete';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createProject } from './backend.js';
-import moment from 'moment';
+import shouldPureComponentUpdate from 'react-pure-render/function';
 
 const darkGreen = "#24282b";
 // const green = "#4d6059";
 const lightGreen = "#7f8d89";
 
 const Wrapper = styled.div`
+display: block;
 width: 40vw;
 max-width: 40vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 `
 
 const Table = styled.table`
@@ -77,6 +75,9 @@ class CreateProject extends Component {
 
     }
 
+    shouldComponentUpdate = shouldPureComponentUpdate;
+    
+
     handleStartChange = (date) => {
         this.setState({
             startDate: date
@@ -123,7 +124,6 @@ class CreateProject extends Component {
     }
 
     render() {
-        console.log(this.props)
         return (
             <div>
                 <Header>

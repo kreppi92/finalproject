@@ -7,9 +7,6 @@ import ProjectInfo from './Components/ProjectInfo.js'
 import CreateProject from './Components/CreateProject.js'
 import { initializeUserIfNeeded } from './Components/backend.js'
 
-
-
-
 class App extends Component {
 constructor() {
   super();
@@ -39,7 +36,6 @@ _handleLogout = (event) => {
 }
 
   render() {
-    console.log(this.state)
     return (
       <BrowserRouter>
         <div className="App">

@@ -3,7 +3,7 @@ import moment from 'moment';
 
 const database = firebase.database();
 const provider = new firebase.auth.GoogleAuthProvider();
-const storageRef = firebase.storage().ref();
+// const storageRef = firebase.storage().ref();
 
 // google maps API
 const GOOGLE_MAPS_API_KEY = 'AIzaSyBfxtILkIqiz2_jVj9PjbvUQYJpJI9jzv0';
@@ -54,21 +54,21 @@ export async function createProject(userId, startDate, endDate, address, descrip
   const projectId = "MTL" + (Math.floor(Math.random() * 1000) + 1000).toString().substring(1)
   const newProject = await database.ref(`users/${userId}/projects`).child(projectId).set({
     completionStatus: {
-      demoStepOne: false,
-      demoStepTwo: false,
-      demoStepThree: false,
-      foundationStepOne: false,
-      foundationStepTwo: false,
-      foundationStepThree: false,
-      wallsStepOne: false,
-      wallsStepTwo: false,
-      wallsStepThree: false,
-      roofingStepOne: false,
-      roofingStepTwo: false,
-      roofingStepThree: false,
-      finishingStepOne: false,
-      finishingStepTwo: false,
-      finishingStepThree: false
+      "Phase 1 - Demo - Step 1": false,
+      "Phase 1 - Demo - Step 2": false,
+      "Phase 1 - Demo - Step 3": false,
+      "Phase 2 - Foundation - Step 1": false,
+      "Phase 2 - Foundation - Step 2": false,
+      "Phase 2 - Foundation - Step 3": false,
+      "Phase 3 - Walls - Step 1": false,
+      "Phase 3 - Walls - Step 2": false,
+      "Phase 3 - Walls - Step 3": false,
+      "Phase 4 - Roofing - Step 1": false,
+      "Phase 4 - Roofing - Step 2": false,
+      "Phase 4 - Roofing - Step 3": false,
+      "Phase 5 - Finishes - Step 1": false,
+      "Phase 5 - Finishes - Step 2": false,
+      "Phase 5 - Finishes - Step 3": false
       // use Object.keys(project.completionStatus).filter(a => a.includes('demo').map(a=>({[a]: project.completedStatus[a]}))) to render the different types of tasks
       // or use getTaskGroup() function
     },
@@ -240,7 +240,7 @@ async function getCoords(address) {
 }
 
 // used within getProjectInfo function to get weather object, adds it as a key within the return project object
-async function weatherApp(coords) {
+export async function weatherApp(coords) {
   const url = `${CORS_PROXY}${DARKSKY_API_URL}${DARKSKY_API_KEY}/${coords.lat},${coords.lng}?units=si&exclude=minutely,hourly,daily,alerts,flags`;
   const fetchWeather = await fetch(url)
   const data = await fetchWeather.json()
@@ -263,4 +263,28 @@ export async function editProjectNotes(userId, projectId, inputText) {
   })
   return { ...updatedProject, id: projectId }
   // edit notes section of project, if we add this functionality
+}
+
+
+// ~~~~
+
+export async function updateProject2(userId, projectId, task) {
+  const projectRaw = await database.ref(`users/${userId}/projects/${projectId}/completionStatus/${task}`).once('value')
+  const project = projectRaw.val()
+  await database.ref(`users/${userId}/projects/${projectId}/completionStatus/${task}`).set(!project)
+}
+
+export async function weatherApp2(coords) {
+  const url = `${CORS_PROXY}${DARKSKY_API_URL}${DARKSKY_API_KEY}/${coords.lat},${coords.lng}?units=si&exclude=minutely,hourly,daily,alerts,flags`;
+  const fetchWeather = await fetch(url)
+  const data = await fetchWeather.json()
+  return data
+}
+
+export async function progress2(completionStatus, startDate, endDate) {
+  const start = moment(startDate).unix()
+  const current = moment().unix()
+  const end = moment(endDate).unix()
+  const comparedTimes = (end - current) / (end - start) * 100
+return (completionStatus > comparedTimes)
 }

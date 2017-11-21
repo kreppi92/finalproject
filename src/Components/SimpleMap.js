@@ -10,7 +10,7 @@ import { _returnImage } from './avatars.js';
 import styled from 'styled-components';
 import Scrolling from './Scrolling.js'
 import UserThumbnail from './UserThumbnail.js'
-import { calculateProgressStatus } from './backend.js';
+import moment from 'moment';
 
 const API_KEY = 'AIzaSyBfxtILkIqiz2_jVj9PjbvUQYJpJI9jzv0'
 
@@ -31,7 +31,7 @@ height: 80vh;
 background-color: rgba(0, 0, 0, 0.6);
 display: flex;
 border-radius: 10px;
--webkit-transition: 0.5s;
+-webkit-transition: 1s;
 }
 `
 
@@ -40,16 +40,7 @@ min-width: 20vw;
 `
 
 const TestDivRight = styled.div`
-color: white;
-min-width:100%;
-width:100%;
-max-width: 100%;
-position:absolute;
--webkit-transition: 0.5s;
-display: flex;
-overflow: hidden;
-white-space: nowrap;
-text-overflow: ellipsis;
+position: absolute;
 `
 
 const Wrapper = styled.div`
@@ -71,23 +62,21 @@ position: relative;
 `
 
 const TestDivRightWrapper = styled.div`
-`
-
-const UserProfile = styled.div`
-background-color: ${ (props) => props.loginId === "Grace" ? "#ffffff" : "#00000"};
+width: 100%;
+overflow: hidden;
 `
 
 const NewProject = styled.button`
-    color: ${(props) => props.creatingNewProject ? `${darkGreen}` : "white"};
+    color: ${(props) => props.creatingProject ? `${darkGreen}` : "white"};
     font-size: .8em;
     margin: 2em;
     width: 150px;
     height: 20px;
-    background-color: ${(props) => props.creatingNewProject ? `white` : `${lightGreen}`};
+    background-color: ${(props) => props.creatingProject ? `white` : `${lightGreen}`};
     padding: 0.25em 1em;
     border: none;
     border-radius: 20px;
-    -webkit-filter: ${(props) => props.creatingNewProject ? "drop-shadow(0px 0px 12px rgba(0, 231, 255, 0.8))" : ""};
+    -webkit-filter: ${(props) => props.creatingProject ? "drop-shadow(0px 0px 12px rgba(0, 231, 255, 0.8))" : ""};
     -webkit-transition: 0.3s;
 
 
@@ -133,8 +122,8 @@ class SimpleMap extends Component {
         this.setState({ hoveringObject: false });
     }
 
-    _onClick = (object) => {
-        this.setState({ selectedObject: object, creatingProject: false, newAddress: null });
+    _onClick = (i) => {
+        this.setState({ selectedObject: this.props.objects[i], selectedObjectIndex: i, creatingProject: false, newAddress: null })
     }
 
     _onClickClear = () => {
@@ -146,9 +135,11 @@ class SimpleMap extends Component {
         this.setState({ selectedObject: false, creatingProject: true, newAddress: null });
     }
 
-
-
     shouldComponentUpdate = shouldPureComponentUpdate;
+
+    componentWillReceiveProps(nextProps) {
+        this.setState({ selectedObject: nextProps.objects[this.state.selectedObjectIndex] });
+    }
 
     constructor(props) {
         super(props);
@@ -158,6 +149,7 @@ class SimpleMap extends Component {
             creatingProject: false,
             offsetAmount: "",
             newAddress: false,
+            selectedObjectIndex: 0,
         };
     }
 
@@ -177,21 +169,30 @@ class SimpleMap extends Component {
     _calculateProgressStatus = (project) => {
         const progress = Object.keys(project.completionStatus).map(p => project.completionStatus[p])
         const comparedLengths = progress.filter(p => p).length / progress.length
-        return comparedLengths * 100
+        return Math.floor(comparedLengths * 100)
     }
 
+    _calculateIsOnTime = () => {
+        const completionStatus = this._calculateProgressStatus(this.state.selectedObject)
+        const start = moment(this.state.selectedObject.startDate).unix()
+        const end = moment(this.state.selectedObject.endDate).unix()
+        const current = moment().unix()
+        const comparedTimes = Math.floor(((end - current) / (end - start))*100)
+        return (current > start && current < end) ? (completionStatus >= comparedTimes) : !(current > end && completionStatus < 100 )
+      }
+
     render() {
+        console.log(this.state.selectedObject)
         return (
             <Wrapper>
-                <TestDiv zIndex="10000000" isSelected={this.state.selectedObject}>
+                <TestDiv zIndex="10000000" isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
                     <TestDivLeft>
                         <UserThumbnail user={this.props.user} handleLogout={this.props.handleLogout} />
                         <Title>Current projects...</Title>
                         <ProjectsList>
                             {this.props.objects.length > 1 ?
                                 <Scrolling>
-                                    {this.props.objects.map(object => {
-                                        console.log(this._calculateProgressStatus(object) * 100)
+                                    {this.props.objects.map((object, i) => {
                                         return (
                                             <ListThumbnail
                                                 projectNumber={object.id}
@@ -207,8 +208,9 @@ class SimpleMap extends Component {
                                                 key={object.id}
                                                 onMouseEnter={() => this._onMouseEnterObject(object.id)}
                                                 isHovering={this.state.hoveringObject === object.id}
-                                                onClick={() => this._onClick(object)}
+                                                onClick={() => this._onClick(i)}
                                                 isSelected={this.state.selectedObject.id === object.id}
+                                                updateProjects={this.props.updateProjects}
                                             />
                                         )
                                     })}
@@ -217,15 +219,21 @@ class SimpleMap extends Component {
                                 false
                             }
                         </ProjectsList>
-                        <NewProject onClick={this._handleCreateNewProject} creatingNewProject={this.state.creatingProject}>
+                        <NewProject onClick={this._handleCreateNewProject} creatingProject={this.state.creatingProject}>
                             + NEW PROJECT
                         </NewProject>
                     </TestDivLeft>
                     <TestDivRightWrapper>
-                    <TestDivRight isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
-                        {this.state.selectedObject ? <ProjectInfo object={this.state.selectedObject} completionStatus={this._calculateProgressStatus(this.state.selectedObject)} /> : false}
-                        {this.state.creatingProject ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} /> : false}
-                    </TestDivRight>
+                        <TestDivRight isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
+                            {this.state.selectedObject ? <ProjectInfo
+                                object={this.state.selectedObject}
+                                completionStatus={this._calculateProgressStatus(this.state.selectedObject)}
+                                userID={this.props.user.id}
+                                updateProjects={this.props.updateProjects}
+                                isOnTime={this._calculateIsOnTime()}
+                                /> : false}
+                            {this.state.creatingProject ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} /> : false}
+                        </TestDivRight>
                     </TestDivRightWrapper>
                 </TestDiv>
                 <GoogleMapReact
@@ -242,7 +250,7 @@ class SimpleMap extends Component {
                     onChildMouseLeave={this._onMouseLeaveObject}
                     onChange={this._bounds}
                 >
-                    {this.props.objects.map(object => {
+                    {this.props.objects.map((object, i) => {
                         return (
 
                             <PinThumbnail
@@ -253,15 +261,17 @@ class SimpleMap extends Component {
                                 completionStatus={this._calculateProgressStatus(object)}
                                 lat={object.coords.lat}
                                 lng={object.coords.lng}
-                                alert={object.alert}
+                                alert={object.notes}
                                 zIndex={Math.floor(1 / object.coords.lat * 1000000)}
                                 image={_returnImage(this._calculateProgressStatus(object))}
                                 key={object.id}
                                 onMouseEnter={() => this._onMouseEnterObject(object.id)}
                                 onMouseLeave={this._onMouseLeaveObject}
                                 isHovering={this.state.hoveringObject === object.id}
-                                onClick={() => this._onClick(object)}
+                                onClick={() => this._onClick(i)}
                                 isSelected={this.state.selectedObject.id === object.id}
+                                updateProjects={this.props.updateProjects}
+                                
                             />
                         )
                     })}

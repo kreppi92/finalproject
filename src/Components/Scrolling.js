@@ -5,7 +5,7 @@ const TIME_CONSTANT = 325
 const WHEEL_SPEED = 5
 
 const BASE_STYLE = {
-    position: 'absolute',
+    position: 'relative',
     top: 0,
     left: 0,
     width: '100%',
@@ -14,7 +14,7 @@ const BASE_STYLE = {
 }
 
 const VIEW_STYLE = {
-    position: 'absolute',
+    // position: 'absolute',
     top: 0,
     left: 0,
 }
@@ -83,9 +83,14 @@ class Scrolling extends React.Component {
             offset = (x < min) ? min : x
         }
 
+        this.refs.view ? 
+        
         this.refs.view.style.transform = this.props.horizontal ?
-                                         `translateX(${-offset}px)` :
-                                         `translateY(${-offset}px)`
+        `translateX(${-offset}px)` :
+        `translateY(${-offset}px)`
+
+        : false
+
 
         this.setState({ offset })
         this.trackPosition()
