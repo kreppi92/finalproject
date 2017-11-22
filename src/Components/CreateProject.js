@@ -76,7 +76,7 @@ class CreateProject extends Component {
     }
 
     shouldComponentUpdate = shouldPureComponentUpdate;
-    
+
 
     handleStartChange = (date) => {
         this.setState({
@@ -117,9 +117,12 @@ class CreateProject extends Component {
         event.preventDefault();
         createProject(this.props.user.id, this.state.startDate, this.state.endDate, this.state.address, this.state.projectDescription, this.state.projectName)
             .then(data => {
+                // this.props.setSelected(data)
+                this.props.updateProjects();
                 this.setState({
-                    newProjectID: data.id
-                })
+                    newProjectID: data.id,
+                    newProjectObject: data,
+                });
             })
     }
 

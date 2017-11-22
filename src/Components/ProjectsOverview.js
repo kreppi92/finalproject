@@ -62,15 +62,16 @@ class ProjectsOverview extends Component {
     render() {
         return (
             <Wrapper>
-                {this.props.isLoggedIn ?
+                {/* {this.props.isLoggedIn ? */}
                     <SimpleMap
                         objects={this.state.objects}
                         setHover={this._setHover}
                         user={this.props.user}
                         handleLogout={this.props.handleLogout}
                         updateProjects={this._updateProject}
-                    /> :
-                    <Link to={"/"}><h2> Please login to view </h2></Link>}
+                    />
+                     {/* : */}
+                    {/* <Link to={"/"}><h2> Please login to view </h2></Link>} */}
             </Wrapper>
         )
     }

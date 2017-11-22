@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import Scrolling from './Scrolling.js'
 import UserThumbnail from './UserThumbnail.js'
 import moment from 'moment';
+import { getProjectInfo } from './backend.js'
 
 const API_KEY = 'AIzaSyBfxtILkIqiz2_jVj9PjbvUQYJpJI9jzv0'
 
@@ -32,6 +33,7 @@ background-color: rgba(0, 0, 0, 0.6);
 display: flex;
 border-radius: 10px;
 -webkit-transition: 1s;
+
 }
 `
 
@@ -40,7 +42,10 @@ min-width: 20vw;
 `
 
 const TestDivRight = styled.div`
+width: 100%;
+height: 100%;
 position: absolute;
+white-space: nowrap;
 `
 
 const Wrapper = styled.div`
@@ -52,9 +57,9 @@ const Wrapper = styled.div`
 `
 
 const ProjectsList = styled.div`
-position: relative;
+    position: relative;
     overflow: scroll;
-    height: 75%;
+    height: 80%;
 
 &::-webkit-scrollbar { 
     display: none; 
@@ -63,13 +68,12 @@ position: relative;
 
 const TestDivRightWrapper = styled.div`
 width: 100%;
-overflow: hidden;
+position: relative;
 `
 
 const NewProject = styled.button`
     color: ${(props) => props.creatingProject ? `${darkGreen}` : "white"};
     font-size: .8em;
-    margin: 2em;
     width: 150px;
     height: 20px;
     background-color: ${(props) => props.creatingProject ? `white` : `${lightGreen}`};
@@ -93,11 +97,20 @@ const NewProject = styled.button`
         }
 `
 
-const Title = styled.p`
-padding: 0 1em;
-text-align: left;
-font-size: .9em;
-margin: .5em;
+const NewProjectDiv = styled.div`
+height: 10%;
+display: flex;
+  align-items: center;
+  justify-content: center;
+`
+
+const Title = styled.div`
+height: 5%;
+padding: 1 1.5em;
+display: flex;
+  align-items: left;
+  justify-content: center;
+  text-align: left;
 `
 
 class SimpleMap extends Component {
@@ -106,6 +119,15 @@ class SimpleMap extends Component {
         zoom: 12
     };
 
+    _setSelected = (newObject) => {
+        this.setState({
+            selectedObject: newObject,
+            selectedObjectIndex: this.props.objects.map((objects, i)=>{if(objects.id==newObject.id){return i}}),
+            creatingProject: false,
+            justCreated: true,
+        })
+        setTimeout(()=>this.setState({justCreated: false}), 6000)
+    }
 
     _distanceToMouse = (markerPos, mousePos, markerProps) => {
         const x = markerPos.x;
@@ -150,6 +172,7 @@ class SimpleMap extends Component {
             offsetAmount: "",
             newAddress: false,
             selectedObjectIndex: 0,
+            justCreated: false,
         };
     }
 
@@ -177,12 +200,11 @@ class SimpleMap extends Component {
         const start = moment(this.state.selectedObject.startDate).unix()
         const end = moment(this.state.selectedObject.endDate).unix()
         const current = moment().unix()
-        const comparedTimes = Math.floor(((end - current) / (end - start))*100)
-        return (current > start && current < end) ? (completionStatus >= comparedTimes) : !(current > end && completionStatus < 100 )
-      }
+        const comparedTimes = Math.floor(((end - current) / (end - start)) * 100)
+        return (current > start && current < end) ? (completionStatus >= comparedTimes) : !(current > end && completionStatus < 100)
+    }
 
     render() {
-        console.log(this.state.selectedObject)
         return (
             <Wrapper>
                 <TestDiv zIndex="10000000" isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
@@ -219,20 +241,22 @@ class SimpleMap extends Component {
                                 false
                             }
                         </ProjectsList>
-                        <NewProject onClick={this._handleCreateNewProject} creatingProject={this.state.creatingProject}>
-                            + NEW PROJECT
-                        </NewProject>
+                        <NewProjectDiv>
+                            <NewProject onClick={this._handleCreateNewProject} creatingProject={this.state.creatingProject} >
+                                + NEW PROJECT
+                            </NewProject>
+                        </NewProjectDiv>
                     </TestDivLeft>
                     <TestDivRightWrapper>
                         <TestDivRight isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
-                            {this.state.selectedObject ? <ProjectInfo
+                            {this.state.selectedObject && !this.state.creatingProject && !this.state.justCreated ? <ProjectInfo
                                 object={this.state.selectedObject}
                                 completionStatus={this._calculateProgressStatus(this.state.selectedObject)}
                                 userID={this.props.user.id}
                                 updateProjects={this.props.updateProjects}
                                 isOnTime={this._calculateIsOnTime()}
-                                /> : false}
-                            {this.state.creatingProject ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} /> : false}
+                            /> : false}
+                            {this.state.creatingProject || this.state.justCreated ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} updateProjects={this.props.updateProjects} setSelected={this._setSelected} justCreated={this.state.justCreated}/> : false}
                         </TestDivRight>
                     </TestDivRightWrapper>
                 </TestDiv>
@@ -271,7 +295,7 @@ class SimpleMap extends Component {
                                 onClick={() => this._onClick(i)}
                                 isSelected={this.state.selectedObject.id === object.id}
                                 updateProjects={this.props.updateProjects}
-                                
+
                             />
                         )
                     })}

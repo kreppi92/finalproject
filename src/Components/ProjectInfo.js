@@ -19,16 +19,15 @@ background-color: rgba(100, 100, 100, 0.5);
 `
 
 const Wrapper = styled.div`
-display: block;
-width: 40vw;
-max-width: 40vw;
+height: 100%;
+display: flex;
+flex-direction: column;
 `
 
 const Checklist = styled.div`
-    position: absolute;
-    overflow: scroll;
-    height: 100%;
-    width: 40vw;
+    box-sizing: border-box;
+    padding: 13px;
+    flex: 1;
 
 &::-webkit-scrollbar { 
     display: none; 
@@ -36,7 +35,7 @@ const Checklist = styled.div`
 `
 
 const CheckboxUnit = styled.div`
-display: flex;
+  display: flex;
 `
 
 const CheckboxUnitCheck = styled.div`
@@ -54,24 +53,35 @@ const CheckboxUnitKey = styled.div`
 `
 
 const WeatherApp = styled.div`
+width: 100%;
 position: absolute;
 display: float;
-opacity: .4;
-transform: translate(10%, 10%);
+opacity: .3;
 `
 
 const WeatherAppTemp = styled.div`
 position: absolute;
-display: float;
 font-size: 3em;
+top: 0;
+left: 0;
+padding: 10px;
 `
 
 const WeatherAppIcon = styled.div`
 position: absolute;
-display: float;
 width: 300px;
-transform: translate(-10%, -20%);
-opacity: 0.4
+opacity: 0.4;
+top: 0;
+left: 0;
+`
+
+const WeatherAppDate = styled.div`
+position: absolute;
+font-size: 3em;
+top: 0;
+right: 0;
+text-align: right;
+padding: 10px;
 `
 
 class ProjectInfo extends PureComponent {
@@ -79,6 +89,7 @@ class ProjectInfo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      currentTime: moment().format('LT'),
     }
   }
 
@@ -92,10 +103,12 @@ class ProjectInfo extends PureComponent {
 
   componentDidMount() {
     weatherApp2({ lat: this.props.object.coords.lat, lng: this.props.object.coords.lng })
-    .then(data => this.setState({ currentWeather: data }))
+      .then(data => this.setState({ currentWeather: data }))
+    setInterval(()=>this.setState({currentTime: moment().format('LT')}) ,10000)
   }
 
   render() {
+
     return (
       <Wrapper>
         <WeatherApp>
@@ -114,17 +127,23 @@ class ProjectInfo extends PureComponent {
               />
             </WeatherAppIcon>
             : false}
+            <WeatherAppDate>
+              <div>{moment().format(`MMM D`)}</div>
+              <div>{this.state.currentTime}</div>
+            </WeatherAppDate>
         </WeatherApp>
+        <div>
         <h2>{this.props.object.id}</h2>
         <h2>{this.props.object.name}</h2>
         <p>{this.props.object.description}</p>
         <p>{this.props.object.address}</p>
         <p>Start Date: {moment(this.props.object.startDate).format('L')} - End Date: {moment(this.props.object.endDate).format('L')}</p>
-        <p>Project Completion: {this.props.completionStatus}% - On Time: {this.props.isOnTime ? "On schedule" : "Behind schedule"}</p>
+        <p>Project Completion: {this.props.completionStatus}% - Schedule: {this.props.isOnTime ? "On schedule" : "Behind schedule"}</p>
         <OuterProgressBar>
           <ProgressBar completionStatus={this.props.completionStatus} isOnTime={this.props.isOnTime} />
         </OuterProgressBar>
         <AlertInfo alert={this.props.object.notes} userID={this.props.userID} projectID={this.props.object.id} updateProjects={this.props.updateProjects} />
+        </div>
         <Checklist>
           {Object.keys(this.props.object.completionStatus).length > 1 ?
             <Scrolling>

@@ -2,9 +2,14 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
+const Wrapper = styled.div`
+height: 10%;
+width: 100%;
+`
+
 const UserProfileThumbnail = styled.div`
 width: 100%;
-height: 75px;
+height: 100%;
 margin: 0px;
 display: flex;
 flex-direction: row;
@@ -12,8 +17,8 @@ justify-content: flex-start;
 `
 
 const UserProfileThumbnailImageDiv = styled.div`
-width: 75px;
-height: 75px;
+min-width: 75px;
+height: 100%;
 display: flex;
 align-items: center;
 justify-content: center;
@@ -63,7 +68,7 @@ color: white;
 class UserThumbnail extends Component {
     render() {
         return (
-            <div>
+            <Wrapper>
                 <UserProfileThumbnail>
                     <UserProfileThumbnailImageDiv>
                         <UserProfileThumbnailImageDivSmall>
@@ -79,7 +84,7 @@ class UserThumbnail extends Component {
                         </div>
                     </UserProfileThumbnailDescription>
                 </UserProfileThumbnail>
-            </div>
+            </Wrapper>
         )
     }
 }

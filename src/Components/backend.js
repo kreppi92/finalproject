@@ -52,7 +52,7 @@ export async function displayUser(userId) {
 // returns an object, which includes the project id
 export async function createProject(userId, startDate, endDate, address, description, name) {
   const projectId = "MTL" + (Math.floor(Math.random() * 1000) + 1000).toString().substring(1)
-  const newProject = await database.ref(`users/${userId}/projects`).child(projectId).set({
+  const object = {
     completionStatus: {
       "Phase 1 - Demo - Step 1": false,
       "Phase 1 - Demo - Step 2": false,
@@ -81,16 +81,17 @@ export async function createProject(userId, startDate, endDate, address, descrip
     current: true,
     cancelled: false,
     notes: ''   // modified with editProjectNotes() function
-                // input directly at project creation can be added by adding 'notes' to the parameters, and the notes: value
-  })
-  return { ...newProject, id: projectId }
+    // input directly at project creation can be added by adding 'notes' to the parameters, and the notes: value
+  }
+  const newProject = await database.ref(`users/${userId}/projects`).child(projectId).set(object)
+  return { ...object, id: projectId }
 }
 
 // example: returns only/all 'demo' related tasks
 export async function getTaskGroup(userId, projectId, group) {
   const projectRaw = await database.ref(`users/${userId}/projects`).child(projectId).once('value')
-  const project = projectRaw.val()  
-  const taskGroup = Object.keys(project.completionStatus).filter(a => a.includes(group)).map(a=>({[a]: project.completionStatus[a]}))
+  const project = projectRaw.val()
+  const taskGroup = Object.keys(project.completionStatus).filter(a => a.includes(group)).map(a => ({ [a]: project.completionStatus[a] }))
   return taskGroup
 }
 
@@ -98,16 +99,16 @@ export async function getTaskGroup(userId, projectId, group) {
 export async function getProjectInfo(userId, projectId) {
   const projectRaw = await database.ref(`users/${userId}/projects`).child(projectId).once('value')
   const project = projectRaw.val()
-  const weather = await weatherApp(project.coords)
-  const status = calculateProgressStatus(project)
-  return { ...project, id: projectId, weather, status }
+  // const weather = await weatherApp(project.coords)
+  // const status = calculateProgressStatus(project)
+  return { ...project }
 }
 
 // returns an array of all 'current' projects, as objects, with progress status
 export async function getCurrentProjects(userId) {
-  
+
   const userIdTest = userId ? userId : '115139762849043074764';
-const currentProjects = await database.ref(`users/${userIdTest}/projects`).once('value')
+  const currentProjects = await database.ref(`users/${userIdTest}/projects`).once('value')
   const projects = currentProjects.val()
   const filteredProjects = Object.keys(projects).map(p => ({
     ...projects[p],
@@ -134,7 +135,7 @@ export async function getCompletedProjects(userId) {
   const filteredProjects = Object.keys(projects).map(p => ({
     ...projects[p],
     id: p
-  })).filter(p => checkCompletionStatus(p)).map(p => ({...p, status: calculateProgressStatus(p) }))
+  })).filter(p => checkCompletionStatus(p)).map(p => ({ ...p, status: calculateProgressStatus(p) }))
   return filteredProjects
   // function to get completed projects
   //if true  then set current: false (not in this function)
@@ -197,8 +198,8 @@ export async function updateProject(userId, projectId, task) {
 
 // tests if a project's completionStatus tasks have all been set to true (i.e. project is complete)
 // called within:
-   // getCompletedProjects
-   // updateProject
+// getCompletedProjects
+// updateProject
 function checkCompletionStatus(p) {
   const arr = Object.keys(p.completionStatus).map(k => p.completionStatus[k])
   const complete = arr.filter(a => a).length
@@ -207,10 +208,10 @@ function checkCompletionStatus(p) {
 
 // returns an object with two keys {isOnTIme: true/false, progress: %}
 // called within:
-    // getProjectInfo
-    // getCurrentProjects
-    // getCancelledProjects
-    // getCompletedProjects
+// getProjectInfo
+// getCurrentProjects
+// getCancelledProjects
+// getCompletedProjects
 export function calculateProgressStatus(project) {
   const progress = Object.keys(project.completionStatus).map(p => project.completionStatus[p])
   const comparedLengths = progress.filter(p => p).length / progress.length
@@ -220,7 +221,7 @@ export function calculateProgressStatus(project) {
   const comparedTimes = (end - current) / (end - start)
   //console.log('calculateProgressStatus >>>', { isOnTime: comparedLengths > comparedTimes, progress: comparedLengths })
   return { isOnTime: comparedLengths > comparedTimes, progress: comparedLengths }
-          //  isOnTime: returns true/false, progress: returns percentage as decimal value
+  //  isOnTime: returns true/false, progress: returns percentage as decimal value
 
   // start date, end date, current date
   // (end date - current date) / (end date - start date) = percentage
@@ -281,10 +282,3 @@ export async function weatherApp2(coords) {
   return data
 }
 
-export async function progress2(completionStatus, startDate, endDate) {
-  const start = moment(startDate).unix()
-  const current = moment().unix()
-  const end = moment(endDate).unix()
-  const comparedTimes = (end - current) / (end - start) * 100
-return (completionStatus > comparedTimes)
-}

@@ -14,7 +14,7 @@ const BASE_STYLE = {
 }
 
 const VIEW_STYLE = {
-    // position: 'absolute',
+    position: 'absolute',
     top: 0,
     left: 0,
 }
