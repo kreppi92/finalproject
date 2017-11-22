@@ -116,14 +116,15 @@ class CreateProject extends Component {
     _handleCreateNewProject = (event) => {
         event.preventDefault();
         createProject(this.props.user.id, this.state.startDate, this.state.endDate, this.state.address, this.state.projectDescription, this.state.projectName)
-            .then(data => {
-                // this.props.setSelected(data)
-                this.props.updateProjects();
+            .then(async data => {
+                await this.props.updateProjects();
                 this.setState({
                     newProjectID: data.id,
                     newProjectObject: data,
                 });
-            })
+                return data
+            } )
+            .then(data=>this.props.setSelected(data))
     }
 
     render() {

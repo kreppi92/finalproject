@@ -26,7 +26,7 @@ flex-direction: column;
 
 const Checklist = styled.div`
     box-sizing: border-box;
-    padding: 13px;
+    padding: 0px 13px 20px 13px;
     flex: 1;
 
 &::-webkit-scrollbar { 

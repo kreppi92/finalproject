@@ -49,9 +49,10 @@ class ProjectsOverview extends Component {
             )
     }
 
-    _updateProject = () => {
-        getCurrentProjects(this.props.user.id)
+    _updateProject = async () => {
+        await getCurrentProjects(this.props.user.id)
             .then(objects => {
+                console.log(objects, "projectsoverview log")
                 this.setState({
                     objects: objects
                 })

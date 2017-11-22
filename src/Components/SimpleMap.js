@@ -24,7 +24,7 @@ const lightGreen = "#7f8d89";
 
 const TestDiv = styled.div`
 position: absolute;
-min-width: ${(props) => props.isSelected || props.creatingProject ? `60vw` : `0`};
+min-width: ${(props) => props.isSelected || props.creatingProject || props.justCreated ? `60vw` : `0`};
 top: 10vh;
 left: 10vh;
 z-index: 100000;
@@ -119,14 +119,15 @@ class SimpleMap extends Component {
         zoom: 12
     };
 
-    _setSelected = (newObject) => {
+    _setSelected = async (newObject) => {
+        const index = this.props.objects.findIndex(object=>object.id==newObject.id);
         this.setState({
             selectedObject: newObject,
-            selectedObjectIndex: this.props.objects.map((objects, i)=>{if(objects.id==newObject.id){return i}}),
+            selectedObjectIndex: index,
             creatingProject: false,
             justCreated: true,
         })
-        setTimeout(()=>this.setState({justCreated: false}), 6000)
+        setTimeout(()=>this.setState({justCreated: false}), 4000)
     }
 
     _distanceToMouse = (markerPos, mousePos, markerProps) => {
@@ -160,7 +161,9 @@ class SimpleMap extends Component {
     shouldComponentUpdate = shouldPureComponentUpdate;
 
     componentWillReceiveProps(nextProps) {
-        this.setState({ selectedObject: nextProps.objects[this.state.selectedObjectIndex] });
+        if (this.state.selectedObject !== false ) {
+            this.setState({ selectedObject: nextProps.objects[this.state.selectedObjectIndex] });
+        }
     }
 
     constructor(props) {
@@ -207,7 +210,7 @@ class SimpleMap extends Component {
     render() {
         return (
             <Wrapper>
-                <TestDiv zIndex="10000000" isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject}>
+                <TestDiv zIndex="10000000" isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject} justCreated={this.state.justCreated}>
                     <TestDivLeft>
                         <UserThumbnail user={this.props.user} handleLogout={this.props.handleLogout} />
                         <Title>Current projects...</Title>
