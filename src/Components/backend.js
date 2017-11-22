@@ -83,7 +83,7 @@ export async function createProject(userId, startDate, endDate, address, descrip
     notes: ''   // modified with editProjectNotes() function
     // input directly at project creation can be added by adding 'notes' to the parameters, and the notes: value
   }
-  const newProject = await database.ref(`users/${userId}/projects`).child(projectId).set(object)
+  await database.ref(`users/${userId}/projects`).child(projectId).set(object)
   return { ...object, id: projectId }
 }
 

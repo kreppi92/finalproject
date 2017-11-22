@@ -95,7 +95,7 @@ class ProjectInfo extends PureComponent {
 
   _handleCheckbox = (task) => {
     updateProject2(this.props.userID, this.props.object.id, task)
-    this.props.updateProjects()
+    this.props.updateProjects();
   }
 
   componentWillReceiveProps() {
@@ -103,8 +103,12 @@ class ProjectInfo extends PureComponent {
 
   componentDidMount() {
     weatherApp2({ lat: this.props.object.coords.lat, lng: this.props.object.coords.lng })
-      .then(data => this.setState({ currentWeather: data }))
-    setInterval(()=>this.setState({currentTime: moment().format('LT')}) ,10000)
+      .then(data => this.setState({ currentWeather: data }));
+    this.interval = setInterval(()=>this.setState({currentTime: moment().format('LT')}) ,10000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   render() {
@@ -148,7 +152,7 @@ class ProjectInfo extends PureComponent {
           {Object.keys(this.props.object.completionStatus).length > 1 ?
             <Scrolling>
               {Object.keys(this.props.object.completionStatus).map(x => (
-                <CheckboxUnit>
+                <CheckboxUnit key={x}>
                   <CheckboxUnitCheck>
                     <input type="checkbox" checked={this.props.object.completionStatus[x] ? "checked" : ""} key={x} ref={r => this.x = r} onChange={() => this._handleCheckbox(x)} />
                   </CheckboxUnitCheck>

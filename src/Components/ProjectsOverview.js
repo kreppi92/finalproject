@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import SimpleMap from './SimpleMap.js'
 import { getCurrentProjects } from './backend.js';
-import { Link } from 'react-router-dom';
 
 const darkGreen = "#24282b";
 // const green = "#4d6059";
@@ -52,7 +51,6 @@ class ProjectsOverview extends Component {
     _updateProject = async () => {
         await getCurrentProjects(this.props.user.id)
             .then(objects => {
-                console.log(objects, "projectsoverview log")
                 this.setState({
                     objects: objects
                 })

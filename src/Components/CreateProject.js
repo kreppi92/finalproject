@@ -5,6 +5,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { createProject } from './backend.js';
 import shouldPureComponentUpdate from 'react-pure-render/function';
+import moment from 'moment'
 
 const darkGreen = "#24282b";
 // const green = "#4d6059";
@@ -198,7 +199,7 @@ class CreateProject extends Component {
                                                     selected={this.state.startDate}
                                                     onChange={this.handleStartChange}
                                                     ref={r => this.startDate = r}
-                                                    value={this.state.startDate}
+                                                    value={moment(this.state.startDate).format('L')}
                                                 />
                                             </Column2>
                                         </Rows>
@@ -211,7 +212,7 @@ class CreateProject extends Component {
                                                     selected={this.state.endDate}
                                                     onChange={this.handleEndChange}
                                                     ref={r => this.endDate = r}
-                                                    state={this.state.endDate}
+                                                    state={moment(this.state.endDate).format('L')}
                                                 />
                                             </Column2>
                                         </Rows>

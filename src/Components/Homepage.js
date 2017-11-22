@@ -73,7 +73,11 @@ class Homepage extends Component {
     }
 
     componentDidMount() {
-        setInterval(this._animation, 1000)
+        this.interval = setInterval(this._animation, 1000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     render() {

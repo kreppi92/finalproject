@@ -35,8 +35,8 @@ class Scrolling extends React.Component {
 
         this.handleDrag = this.handleDrag.bind(this)
         this.handleRelease = this.props.snap ?
-                             this.handleReleaseWithSnap.bind(this) :
-                             this.handleRelease.bind(this)
+            this.handleReleaseWithSnap.bind(this) :
+            this.handleRelease.bind(this)
         this.handleResize = this.handleResize.bind(this)
     }
 
@@ -47,6 +47,12 @@ class Scrolling extends React.Component {
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.handleResize)
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.selectedIndex && this.props.selectedIndex !== nextProps.selectedIndex) {
+            this.scrollToItem(nextProps.selectedIndex);
+        }
     }
 
     setMaxTransform() {
@@ -83,13 +89,9 @@ class Scrolling extends React.Component {
             offset = (x < min) ? min : x
         }
 
-        this.refs.view ? 
-        
-        this.refs.view.style.transform = this.props.horizontal ?
-        `translateX(${-offset}px)` :
-        `translateY(${-offset}px)`
-
-        : false
+        if (this.refs.view) {
+            this.refs.view.style.transform = this.props.horizontal ? `translateX(${-offset}px)` : `translateY(${-offset}px)`;
+        }
 
 
         this.setState({ offset })
@@ -365,13 +367,13 @@ class Scrolling extends React.Component {
         return (
             <div style={BASE_STYLE} className={this.props.className} ref="base">
                 <div
-                  style={viewStyle}
-                  ref="view"
-                  id="js-view"
-                  onMouseDown={tapHandler}
-                  onMouseUp={this.handleRelease}
-                  onClick={clickHandler}
-                  onWheel={wheelHandler}
+                    style={viewStyle}
+                    ref="view"
+                    id="js-view"
+                    onMouseDown={tapHandler}
+                    onMouseUp={this.handleRelease}
+                    onClick={clickHandler}
+                    onWheel={wheelHandler}
                 >
                     {this.props.children}
                 </div>

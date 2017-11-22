@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import Scrolling from './Scrolling.js'
 import UserThumbnail from './UserThumbnail.js'
 import moment from 'moment';
-import { getProjectInfo } from './backend.js'
 
 const API_KEY = 'AIzaSyBfxtILkIqiz2_jVj9PjbvUQYJpJI9jzv0'
 
@@ -120,7 +119,7 @@ class SimpleMap extends Component {
     };
 
     _setSelected = async (newObject) => {
-        const index = this.props.objects.findIndex(object=>object.id==newObject.id);
+        const index = this.props.objects.findIndex(object=>object.id===newObject.id);
         this.setState({
             selectedObject: newObject,
             selectedObjectIndex: index,
@@ -216,7 +215,7 @@ class SimpleMap extends Component {
                         <Title>Current projects...</Title>
                         <ProjectsList>
                             {this.props.objects.length > 1 ?
-                                <Scrolling>
+                                <Scrolling selectedIndex={this.state.selectedObjectIndex} snap={75}>
                                     {this.props.objects.map((object, i) => {
                                         return (
                                             <ListThumbnail
@@ -278,29 +277,30 @@ class SimpleMap extends Component {
                     onChange={this._bounds}
                 >
                     {this.props.objects.map((object, i) => {
-                        return (
-
-                            <PinThumbnail
-                                projectNumber={object.id}
-                                projectTitle={object.name}
-                                projectDescription={object.description}
-                                address={object.address}
-                                completionStatus={this._calculateProgressStatus(object)}
-                                lat={object.coords.lat}
-                                lng={object.coords.lng}
-                                alert={object.notes}
-                                zIndex={Math.floor(1 / object.coords.lat * 1000000)}
-                                image={_returnImage(this._calculateProgressStatus(object))}
-                                key={object.id}
-                                onMouseEnter={() => this._onMouseEnterObject(object.id)}
-                                onMouseLeave={this._onMouseLeaveObject}
-                                isHovering={this.state.hoveringObject === object.id}
-                                onClick={() => this._onClick(i)}
-                                isSelected={this.state.selectedObject.id === object.id}
-                                updateProjects={this.props.updateProjects}
-
-                            />
-                        )
+                        if (object.id) {
+                            return (
+                                <PinThumbnail
+                                    projectNumber={object.id}
+                                    projectTitle={object.name}
+                                    projectDescription={object.description}
+                                    address={object.address}
+                                    completionStatus={this._calculateProgressStatus(object)}
+                                    lat={object.coords.lat}
+                                    lng={object.coords.lng}
+                                    alert={object.notes}
+                                    zIndex={Math.floor(1 / object.coords.lat * 1000000)}
+                                    image={_returnImage(this._calculateProgressStatus(object))}
+                                    key={object.id}
+                                    onMouseEnter={() => this._onMouseEnterObject(object.id)}
+                                    onMouseLeave={this._onMouseLeaveObject}
+                                    isHovering={this.state.hoveringObject === object.id}
+                                    onClick={() => this._onClick(i)}
+                                    isSelected={this.state.selectedObject.id === object.id}
+                                    updateProjects={this.props.updateProjects}
+    
+                                />
+                            )
+                        } return null
                     })}
                 </GoogleMapReact>
             </Wrapper>
