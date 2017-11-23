@@ -96,7 +96,7 @@ class Homepage extends Component {
                     <img src={avatars[this.state.image]} alt="House building animation" />
                 </ImageRow>
                 <Row>
-                    {this.props.isLoggedIn ? <h1>Welcome {this.props.userName}</h1> : <TitleWrapper><h1>MAP</h1><TitleOpaque>FOLIO</TitleOpaque></TitleWrapper>}
+                    {this.props.isLoggedIn ? <TitleWrapper><h1>Welcome&nbsp;</h1><TitleOpaque>{this.props.userName}</TitleOpaque></TitleWrapper> : <TitleWrapper><h1>MAP</h1><TitleOpaque>FOLIO</TitleOpaque></TitleWrapper>}
                     {this.props.isLoggedIn ?
                         (<Link to="/projects">
                             <LoginButton>Enter</LoginButton>

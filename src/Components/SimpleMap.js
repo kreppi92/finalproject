@@ -106,7 +106,7 @@ justify-content: center;
 
 const Title = styled.div`
 height: 5%;
-padding: 5px;
+padding: 0px 5px;
 display: flex;
 align-items: left;
 justify-content: center;
@@ -146,7 +146,7 @@ const SearchClearButtons = styled.button`
     width: 22px;
     height: 22px;
     background-color: ${lightGreen};
-    padding: 0.25em;
+    padding: 0px 0.25em;
     border: 2px;
     border-color: rgba(255,255,255,.8);
     border-radius: 50%;
