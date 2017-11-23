@@ -58,16 +58,53 @@ class ProjectsOverview extends Component {
             )
     }
 
+    _searchFunction = async () => {
+        const raw =   await getCurrentProjects(this.props.user.id) //this.state.objects
+        const filtered = raw.filter(p => 
+            p.name.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(this.state.searchText)
+            || p.description.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(this.state.searchText)
+            || p.address.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(this.state.searchText)
+            || p.id.normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(this.state.searchText)
+        )
+        this.setState({
+            ...this.state,
+            objects: filtered
+        })
+    }
+
+    _searchInput = (e) => {
+        this.setState({
+            ...this.state,
+            searchText: e.target.value
+        })
+    }
+
+    _clearSearch = () => {
+        getCurrentProjects(this.props.user.id)
+        .then(objects => {
+            this.setState({
+                ...this.state,
+                objects: objects,
+                searchText: ''
+            })
+        }
+        )
+    }
+
     render() {
         return (
             <Wrapper>
                 {/* {this.props.isLoggedIn ? */}
-                    <SimpleMap
+                <SimpleMap
                         objects={this.state.objects}
                         setHover={this._setHover}
                         user={this.props.user}
                         handleLogout={this.props.handleLogout}
                         updateProjects={this._updateProject}
+                        searchFunction={this._searchFunction}
+                        searchInput={this._searchInput}
+                        clearSearch={this._clearSearch}
+                        searchText={this.state.searchText}
                     />
                      {/* : */}
                     {/* <Link to={"/"}><h2> Please login to view </h2></Link>} */}

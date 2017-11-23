@@ -12,6 +12,8 @@ const avatars = [
 ]
 
 const alert = "https://firebasestorage.googleapis.com/v0/b/decodemtl-nsu.appspot.com/o/Alert.png?alt=media&token=155ffed2-dc13-43fe-93fd-39160cc60e71"
+const search = "https://firebasestorage.googleapis.com/v0/b/decodemtl-nsu.appspot.com/o/1120403-200.png?alt=media&token=ef0c0f19-7de0-40a0-a293-2c955bb7c6cf"
+const cancel = "https://firebasestorage.googleapis.com/v0/b/decodemtl-nsu.appspot.com/o/1121796-200.png?alt=media&token=58d0a72a-e8ad-45e7-927f-c6036080ddfa"
 
 const _returnImage = (percentage) => {
     return (
@@ -30,4 +32,4 @@ const _returnImage = (percentage) => {
 }
 
 export default avatars;
-export { _returnImage, alert };
+export { _returnImage, alert, search, cancel };

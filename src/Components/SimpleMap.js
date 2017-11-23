@@ -6,7 +6,8 @@ import CreateProject from './CreateProject.js';
 import PinThumbnail, { HOUSE_SIZE } from './PinThumbnail.js';
 import ListThumbnail from './ListThumbnail.js';
 import shouldPureComponentUpdate from 'react-pure-render/function';
-import { _returnImage } from './avatars.js';
+import { _returnImage, search, cancel } from './avatars.js';
+import SearchBar from './Search.js'
 import styled from 'styled-components';
 import Scrolling from './Scrolling.js'
 import UserThumbnail from './UserThumbnail.js'
@@ -99,17 +100,83 @@ const NewProject = styled.button`
 const NewProjectDiv = styled.div`
 height: 10%;
 display: flex;
-  align-items: center;
-  justify-content: center;
+align-items: center;
+justify-content: center;
 `
 
 const Title = styled.div`
 height: 5%;
-padding: 1 1.5em;
+padding: 5px;
 display: flex;
-  align-items: left;
+align-items: left;
+justify-content: center;
+text-align: left;
+`
+
+const SearchFormDiv = styled.div`
+width: 100%;
+display: flex;
+align-items: center;
+justify-content: center;
+opacity: .8;
+padding: 0px 5px;
+`
+
+const SearchFormButton = styled.div`
+width: 25px;
+padding: 3px;
+display: flex;
+align-items: center;
+justify-content: center;
+`
+
+const SearchFrom = styled.form`
+width: 100%;
+height: 100%;
+padding: 3px;
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 0px;
+`
+
+const SearchClearButtons = styled.button`
+    color: ${darkGreen};
+    font-size: .8em;
+    width: 22px;
+    height: 22px;
+    background-color: ${lightGreen};
+    padding: 0.25em;
+    border: 2px;
+    border-color: rgba(255,255,255,.8);
+    border-radius: 50%;
+    -webkit-transition: 0.3s;
+    display: flex;
+  align-items: center;
   justify-content: center;
-  text-align: left;
+
+    &:hover{
+        color: ${darkGreen};
+        background-color: white;
+
+    }
+
+    &:active {
+        color: white;
+        background-color: ${darkGreen};
+        }
+`
+
+
+const SearchImages = styled.img`
+width: 15px;
+height: 15px;
+`
+
+const SearchButtons = styled.div`
+    display: flex;
+  align-items: center;
+  justify-content: center;
 `
 
 class SimpleMap extends Component {
@@ -119,14 +186,14 @@ class SimpleMap extends Component {
     };
 
     _setSelected = async (newObject) => {
-        const index = this.props.objects.findIndex(object=>object.id===newObject.id);
+        const index = this.props.objects.findIndex(object => object.id === newObject.id);
         this.setState({
             selectedObject: newObject,
             selectedObjectIndex: index,
             creatingProject: false,
             justCreated: true,
         })
-        setTimeout(()=>this.setState({justCreated: false}), 4000)
+        setTimeout(() => this.setState({ justCreated: false }), 4000)
     }
 
     _distanceToMouse = (markerPos, mousePos, markerProps) => {
@@ -160,7 +227,7 @@ class SimpleMap extends Component {
     shouldComponentUpdate = shouldPureComponentUpdate;
 
     componentWillReceiveProps(nextProps) {
-        if (this.state.selectedObject !== false ) {
+        if (this.state.selectedObject !== false) {
             this.setState({ selectedObject: nextProps.objects[this.state.selectedObjectIndex] });
         }
     }
@@ -175,6 +242,8 @@ class SimpleMap extends Component {
             newAddress: false,
             selectedObjectIndex: 0,
             justCreated: false,
+            isSearching: false,
+            searchText: "",
         };
     }
 
@@ -206,41 +275,80 @@ class SimpleMap extends Component {
         return (current > start && current < end) ? (completionStatus >= comparedTimes) : !(current > end && completionStatus < 100)
     }
 
+    _renderThumbnails = () => {
+        return this.props.objects.map((object, i) => {
+            if (object.id) {
+                return (
+                    <ListThumbnail
+                        projectNumber={object.id}
+                        projectTitle={object.name}
+                        projectDescription={object.description}
+                        address={object.address}
+                        completionStatus={this._calculateProgressStatus(object)}
+                        lat={object.coords.lat}
+                        lng={object.coords.lng}
+                        alert={object.notes}
+                        zIndex={Math.floor(1 / object.coords.lat * 1000000)}
+                        image={_returnImage(this._calculateProgressStatus(object))}
+                        key={object.id}
+                        onMouseEnter={() => this._onMouseEnterObject(object.id)}
+                        isHovering={this.state.hoveringObject === object.id}
+                        onClick={() => this._onClick(i)}
+                        isSelected={this.state.selectedObject && this.state.selectedObject.id === object.id}
+                        updateProjects={this.props.updateProjects}
+                    />
+                )
+            }
+            return null;
+        });
+    }
+
+    _handleSubmit = (e) => {
+        e.preventDefault();
+        this.props.searchFunction()
+    }
+
+    _handleClear = (e) => {
+        e.preventDefault();
+        this.setState({
+            selectedObject: false,
+            selectedObjectIndex: 0,
+        })
+        this.props.clearSearch()
+    }
+
     render() {
         return (
             <Wrapper>
                 <TestDiv zIndex="10000000" isSelected={this.state.selectedObject} creatingProject={this.state.creatingProject} justCreated={this.state.justCreated}>
                     <TestDivLeft>
                         <UserThumbnail user={this.props.user} handleLogout={this.props.handleLogout} />
-                        <Title>Current projects...</Title>
+                        <Title>
+                            <SearchFrom type="submit" onSubmit={this._handleSubmit}>
+                                <SearchFormDiv>
+                                    <input type="text" value={this.props.searchText} onChange={(e) => this.props.searchInput(e)} placeholder="Search for projects..." />
+                                </SearchFormDiv>
+                                <SearchButtons>
+                                    <SearchFormButton>
+                                        <SearchClearButtons>
+                                            <SearchImages src={search} alt="Search" />
+                                        </SearchClearButtons>
+                                    </SearchFormButton>
+                                    <SearchFormButton>
+                                        <SearchClearButtons onClick={this._handleClear}>
+                                            <SearchImages src={cancel} alt="cancel" />
+                                        </SearchClearButtons>
+                                    </SearchFormButton>
+                                </SearchButtons>
+                            </SearchFrom>
+                        </Title>
                         <ProjectsList>
-                            {this.props.objects.length > 1 ?
+                            {this.props.objects.length > 1 ? (
                                 <Scrolling selectedIndex={this.state.selectedObjectIndex} snap={75}>
-                                    {this.props.objects.map((object, i) => {
-                                        return (
-                                            <ListThumbnail
-                                                projectNumber={object.id}
-                                                projectTitle={object.name}
-                                                projectDescription={object.description}
-                                                address={object.address}
-                                                completionStatus={this._calculateProgressStatus(object)}
-                                                lat={object.coords.lat}
-                                                lng={object.coords.lng}
-                                                alert={object.notes}
-                                                zIndex={Math.floor(1 / object.coords.lat * 1000000)}
-                                                image={_returnImage(this._calculateProgressStatus(object))}
-                                                key={object.id}
-                                                onMouseEnter={() => this._onMouseEnterObject(object.id)}
-                                                isHovering={this.state.hoveringObject === object.id}
-                                                onClick={() => this._onClick(i)}
-                                                isSelected={this.state.selectedObject.id === object.id}
-                                                updateProjects={this.props.updateProjects}
-                                            />
-                                        )
-                                    })}
-                                </Scrolling>
+                                    {this._renderThumbnails()}
+                                </Scrolling>)
                                 :
-                                false
+                                <div>{this._renderThumbnails()}</div>
                             }
                         </ProjectsList>
                         <NewProjectDiv>
@@ -258,7 +366,7 @@ class SimpleMap extends Component {
                                 updateProjects={this.props.updateProjects}
                                 isOnTime={this._calculateIsOnTime()}
                             /> : false}
-                            {this.state.creatingProject || this.state.justCreated ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} updateProjects={this.props.updateProjects} setSelected={this._setSelected} justCreated={this.state.justCreated}/> : false}
+                            {this.state.creatingProject || this.state.justCreated ? <CreateProject handleNewAddress={this._handleNewAddress} user={this.props.user} updateProjects={this.props.updateProjects} setSelected={this._setSelected} justCreated={this.state.justCreated} /> : false}
                         </TestDivRight>
                     </TestDivRightWrapper>
                 </TestDiv>
@@ -297,7 +405,7 @@ class SimpleMap extends Component {
                                     onClick={() => this._onClick(i)}
                                     isSelected={this.state.selectedObject.id === object.id}
                                     updateProjects={this.props.updateProjects}
-    
+
                                 />
                             )
                         } return null
