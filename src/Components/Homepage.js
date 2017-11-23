@@ -53,6 +53,15 @@ const LoginButton = styled.button`
         }
 `;
 
+const TitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`
+
+const TitleOpaque = styled.h1`
+opacity: 0.6;
+`
 
 class Homepage extends Component {
 
@@ -87,7 +96,7 @@ class Homepage extends Component {
                     <img src={avatars[this.state.image]} alt="House building animation" />
                 </ImageRow>
                 <Row>
-                    {this.props.isLoggedIn ? <h1>Welcome {this.props.userName}</h1> : <h1>HOME BUILDER</h1>}
+                    {this.props.isLoggedIn ? <h1>Welcome {this.props.userName}</h1> : <TitleWrapper><h1>MAP</h1><TitleOpaque>FOLIO</TitleOpaque></TitleWrapper>}
                     {this.props.isLoggedIn ?
                         (<Link to="/projects">
                             <LoginButton>Enter</LoginButton>
